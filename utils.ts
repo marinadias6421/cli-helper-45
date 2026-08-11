@@ -1,40 +1,40 @@
-export function memoize<T extends (...args: any[]) => any>(fn: T): T {
-    const cache = new Map<string, ReturnType<T>>();
-    return function(...args: Parameters<T>): ReturnType<T> {
-        const key = JSON.stringify(args);
-        if (cache.has(key)) {
-            return cache.get(key)!;
+// Utility functions for data handling
+
+/**
+ * Deep merges two objects recursively.
+ * @param target The target object to merge into.
+ * @param source The source object to merge from.
+ * @returns The merged object.
+ */
+function deepMerge<T>(target: T, source: Partial<T>): T {
+    for (const key in source) {
+        if (source[key] instanceof Object) {
+            // If the property is an object, recursively merge
+            Object.assign(source[key], deepMerge(target[key] as T, source[key]));
         }
-        const result = fn(...args);
-        cache.set(key, result);
-        return result;
-    } as T;
+    }
+    // Merge and return the result
+    return Object.assign(target || {}, source);
 }
 
-export function debounce<T extends (...args: any[]) => void>(func: T, wait: number): (...args: Parameters<T>) => void {
-    let timeout: ReturnType<typeof setTimeout>;
-    return function(...args: Parameters<T>): void {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func(...args), wait);
-    };
+/**
+ * Filters an array of objects by a given key and value.
+ * @param items The array of objects to filter.
+ * @param key The key to filter by.
+ * @param value The value to match against.
+ * @returns The filtered array of objects.
+ */
+function filterByKey<T>(items: T[], key: keyof T, value: any): T[] {
+    return items.filter(item => item[key] === value);
 }
 
-export function throttle<T extends (...args: any[]) => void>(func: T, limit: number): (...args: Parameters<T>) => void {
-    let lastFunc: ReturnType<typeof setTimeout>;
-    let lastRan: number;
-    return function(...args: Parameters<T>): void {
-        const context = this;
-        if (!lastRan) {
-            func.apply(context, args);
-            lastRan = Date.now();
-        } else {
-            clearTimeout(lastFunc);
-            lastFunc = setTimeout(function() {
-                if ((Date.now() - lastRan) >= limit) {
-                    func.apply(context, args);
-                    lastRan = Date.now();
-                }
-            }, limit - (Date.now() - lastRan));
-        }
-    };
+/**
+ * Converts a camelCase string to a kebab-case string.
+ * @param str The camelCase string to convert.
+ * @returns The converted kebab-case string.
+ */
+function camelToKebab(str: string): string {
+    return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
 }
+
+export { deepMerge, filterByKey, camelToKebab };
