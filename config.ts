@@ -1,21 +1,25 @@
-// Configuration interface to define settings
+import fs from 'fs';
+import path from 'path';
+
 interface Config {
-    apiUrl: string;
-    timeout: number;
-    retries: number;
+    rpcUrl: string;
+    network: string;
+    apiKey: string;
 }
 
-// Default configuration values
 const defaultConfig: Config = {
-    apiUrl: "https://api.defaultcrypto.com",
-    timeout: 5000,
-    retries: 3,
+    rpcUrl: 'https://default.rpc.url',
+    network: 'mainnet',
+    apiKey: 'default-api-key',
 };
 
-// Function to load configuration with defaults
-function loadConfig(customConfig: Partial<Config>): Config {
-    return { ...defaultConfig, ...customConfig };
+function loadConfig(configFilePath: string): Config {
+    const fullPath = path.resolve(__dirname, configFilePath);
+    if (fs.existsSync(fullPath)) {
+        const userConfig = JSON.parse(fs.readFileSync(fullPath, 'utf-8'));
+        return { ...defaultConfig, ...userConfig };
+    }
+    return defaultConfig;
 }
 
-// Export the loadConfig function to be used elsewhere
 export { loadConfig, Config };
