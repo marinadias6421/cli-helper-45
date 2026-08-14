@@ -1,27 +1,31 @@
-import fs from 'fs';
-import winston from 'winston';
-import 'winston-daily-rotate-file';
+import axios, { AxiosRequestConfig } from 'axios';
 
-const transport = new winston.transports.DailyRotateFile({
-    filename: '%DATE%-results.log',
-    datePattern: 'YYYY-MM-DD',
-    zippedArchive: true,
-    maxSize: '20m',
-    maxFiles: '14d',
-});
+interface ApiResponse<T> {
+  data: T;
+  status: number;
+}
 
-const logger = winston.createLogger({
-    level: 'info',
-    format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.json()
-    ),
-    transports: [
-        transport,
-        new winston.transports.Console({
-            format: winston.format.simple(),
-        }),
-    ],
-});
+const BASE_URL = 'https://api.example.com';
 
-export default logger;
+const fetchCryptoData = async (coin: string): Promise<ApiResponse<any>> => {
+  const config: AxiosRequestConfig = {
+    headers: { 'Content-Type': 'application/json' },
+    params: { coin },
+  };
+  try {
+    const response = await axios.get(`${BASE_URL}/cryptodata`, config);
+    return { data: response.data, status: response.status };
+  } catch (error) {
+    throw new Error(`Error fetching data: ${error.message}`);
+  }
+};
+
+const processCryptoData = (data: any): any => {
+  // Perform some processing on the data
+  return data.map((item: any) => ({ id: item.id, price: item.price }));
+};
+
+export const getCryptoInfo = async (coin: string): Promise<any> => {
+  const response = await fetchCryptoData(coin);
+  return processCryptoData(response.data);
+};
