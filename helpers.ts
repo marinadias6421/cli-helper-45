@@ -1,35 +1,37 @@
-// Helper function to safely parse JSON
-function safeJsonParse<T>(jsonString: string): T | null {
-    try {
-        return JSON.parse(jsonString) as T;
-    } catch (error) {
-        console.error('Invalid JSON string:', error);
-        return null; // Return null for invalid JSON
-    }
+// Function to generate a random Ethereum address
+export function generateRandomEthereumAddress(): string {
+    const randomHex = (Math.random() * 0xfffffff * 10000000).toString(16);
+    return '0x' + randomHex.padStart(40, '0');
 }
 
-// Function to process user data
-interface User { id: number; name: string; }
-
-function processUserData(jsonString: string): User | null {
-    const data = safeJsonParse<User>(jsonString);
-    if (!data) {
-        console.error('No valid user data provided.');
-        return null;
-    }
-    // Ensure user has required fields
-    if (!data.id || !data.name) {
-        console.error('User data lacks required fields: id and name.');
-        return null;
-    }
-    return data;
+// Function to convert a number to Wei
+export function toWei(amount: number, unit: string = 'ether'): string {
+    const units = {
+        wei: 1,
+        gwei: 1e9,
+        ether: 1e18,
+    };
+    return (amount * units[unit]).toString();
 }
 
-// Example function usage
-const userDataJson = '{ "id": 1, "name": "Alice" }';
-const user = processUserData(userDataJson);
-if (user) {
-    console.log('User processed successfully:', user);
-} else {
-    console.log('User processing failed.');
+// Function to convert Wei to Ether
+export function fromWei(wei: string, unit: string = 'ether'): number {
+    const units = {
+        wei: 1,
+        gwei: 1e9,
+        ether: 1e18,
+    };
+    return parseFloat(wei) / units[unit];
+}
+
+// Function to validate an Ethereum address
+export function isValidEthereumAddress(address: string): boolean {
+    return /^0x[a-fA-F0-9]{40}$/.test(address);
+}
+
+// Function to calculate transaction fee
+export function calculateTransactionFee(gasPrice: string, gasLimit: number): string {
+    const gasPriceInWei = parseFloat(gasPrice);
+    const fee = gasPriceInWei * gasLimit;
+    return fee.toString();
 }
