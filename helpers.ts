@@ -1,37 +1,25 @@
-// Function to generate a random Ethereum address
-export function generateRandomEthereumAddress(): string {
-    const randomHex = (Math.random() * 0xfffffff * 10000000).toString(16);
-    return '0x' + randomHex.padStart(40, '0');
-}
+type CryptoResponse = { id: string; name: string; symbol: string; rank: number; price_usd: string; }; 
 
-// Function to convert a number to Wei
-export function toWei(amount: number, unit: string = 'ether'): string {
-    const units = {
-        wei: 1,
-        gwei: 1e9,
-        ether: 1e18,
-    };
-    return (amount * units[unit]).toString();
-}
+const fetchCryptocurrencyData = async (id: string): Promise<CryptoResponse> => { 
+    const response = await fetch(`https://api.coinmarketcap.com/v1/cryptocurrency/${id}`); 
+    if (!response.ok) { 
+        throw new Error(`Error fetching data for ${id}: ${response.statusText}`); 
+    } 
+    const data: CryptoResponse = await response.json(); 
+    return data; 
+}; 
 
-// Function to convert Wei to Ether
-export function fromWei(wei: string, unit: string = 'ether'): number {
-    const units = {
-        wei: 1,
-        gwei: 1e9,
-        ether: 1e18,
-    };
-    return parseFloat(wei) / units[unit];
-}
+const formatCryptoData = (data: CryptoResponse): string => { 
+    return `Cryptocurrency: ${data.name} (${data.symbol}), Rank: ${data.rank}, Price: $${parseFloat(data.price_usd).toFixed(2)}`; 
+}; 
 
-// Function to validate an Ethereum address
-export function isValidEthereumAddress(address: string): boolean {
-    return /^0x[a-fA-F0-9]{40}$/.test(address);
-}
+const logCryptoData = async (id: string): Promise<void> => { 
+    try { 
+        const data = await fetchCryptocurrencyData(id); 
+        console.log(formatCryptoData(data)); 
+    } catch (error) { 
+        console.error(error); 
+    } 
+}; 
 
-// Function to calculate transaction fee
-export function calculateTransactionFee(gasPrice: string, gasLimit: number): string {
-    const gasPriceInWei = parseFloat(gasPrice);
-    const fee = gasPriceInWei * gasLimit;
-    return fee.toString();
-}
+export { fetchCryptocurrencyData, formatCryptoData, logCryptoData };
