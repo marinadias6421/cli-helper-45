@@ -1,39 +1,34 @@
-import { BigNumber } from 'bignumber.js';
-
-/**
- * Converts a given amount from one currency to another using a specified rate.
- * @param amount - The amount to convert.
- * @param rate - The conversion rate.
- * @returns The converted amount as a BigNumber.
- */
-export function convertCurrency(amount: number, rate: number): BigNumber {
-    return new BigNumber(amount).multipliedBy(rate);
+// A helper function to calculate the average of an array of numbers
+export function calculateAverage(values: number[]): number {
+    const total = values.reduce((sum, value) => sum + value, 0);
+    return values.length ? total / values.length : 0;
 }
 
-/**
- * Formats a number to a specified number of decimal places.
- * @param value - The numeric value to format.
- * @param decimals - The number of decimal places.
- * @returns The formatted string representation of the number.
- */
-export function formatNumber(value: number, decimals: number = 2): string {
-    return value.toFixed(decimals);
+// A function to filter out invalid crypto prices
+export function filterValidPrices(prices: { [key: string]: number }): { [key: string]: number } {
+    const filtered: { [key: string]: number } = {};
+    for (const [key, value] of Object.entries(prices)) {
+        if (value > 0) {
+            filtered[key] = value;
+        }
+    }
+    return filtered;
 }
 
-/**
- * Checks if the provided string is a valid Ethereum address.
- * @param address - The Ethereum address string.
- * @returns True if valid, otherwise false.
- */
-export function isValidEthereumAddress(address: string): boolean {
-    const regex = /^0x[a-fA-F0-9]{40}$/;
-    return regex.test(address);
+// A function to round numbers to a specified decimal place
+export function roundTo(value: number, decimalPlaces: number): number {
+    if (!isFinite(value)) return 0;
+    const factor = Math.pow(10, decimalPlaces);
+    return Math.round(value * factor) / factor;
 }
 
-/**
- * Retrieves the current timestamp in seconds.
- * @returns The current timestamp.
- */
-export function getCurrentTimestamp(): number {
-    return Math.floor(Date.now() / 1000);
+// A function to get percentage change
+export function percentageChange(oldValue: number, newValue: number): number {
+    if (oldValue === 0) return 0;
+    return ((newValue - oldValue) / Math.abs(oldValue)) * 100;
+}
+
+// A function to format currency values
+export function formatCurrency(value: number, currencySymbol: string = '$'): string {
+    return `${currencySymbol}${value.toFixed(2)}`;
 }
