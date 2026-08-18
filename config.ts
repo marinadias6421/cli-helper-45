@@ -1,25 +1,33 @@
-import fs from 'fs';
-import path from 'path';
+// Configuration settings for the crypto CLI application
 
-interface Config {
-    rpcUrl: string;
-    network: string;
-    apiKey: string;
+// Interface for the configuration options
+interface ConfigOptions {
+    apiBaseURL: string;
+    timeout: number;
+    retries: number;
 }
 
-const defaultConfig: Config = {
-    rpcUrl: 'https://default.rpc.url',
-    network: 'mainnet',
-    apiKey: 'default-api-key',
+// Default configuration values
+const defaultConfig: ConfigOptions = {
+    apiBaseURL: 'https://api.example.com',
+    timeout: 5000,
+    retries: 3,
 };
 
-function loadConfig(configFilePath: string): Config {
-    const fullPath = path.resolve(__dirname, configFilePath);
-    if (fs.existsSync(fullPath)) {
-        const userConfig = JSON.parse(fs.readFileSync(fullPath, 'utf-8'));
-        return { ...defaultConfig, ...userConfig };
-    }
+// Function to get configuration
+function getConfig(): ConfigOptions {
+    // Here you could integrate loading from a file or environment variables
     return defaultConfig;
 }
 
-export { loadConfig, Config };
+// Function to validate configuration
+function validateConfig(config: ConfigOptions): boolean {
+    const urlPattern = /^(https?:\/\/)?([\w.-]+)(:\d+)?(\/[^\s]*)?$/;
+    return (
+        urlPattern.test(config.apiBaseURL) &&
+        config.timeout > 0 &&
+        config.retries >= 0
+    );
+}
+
+export { ConfigOptions, getConfig, validateConfig };
