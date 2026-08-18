@@ -1,37 +1,31 @@
 import axios from 'axios';
 
-// Base URL for cryptocurrency API
-dconst BASE_URL = 'https://api.coingecko.com/api/v3';
+export interface CryptoData {
+    id: string;
+    name: string;
+    symbol: string;
+    current_price: number;
+    market_cap: number;
+    total_volume: number;
+}
 
-// Function to fetch cryptocurrency price
-export const fetchCryptoPrice = async (id: string): Promise<number> => {
-    try {
-        const response = await axios.get(`${BASE_URL}/simple/price?ids=${id}&vs_currencies=usd`);
-        return response.data[id].usd;
-    } catch (error) {
-        console.error('Error fetching price:', error);
-        throw new Error('Failed to fetch the cryptocurrency price');
-    }
-};
+export async function fetchCryptoData(cryptoIds: string[]): Promise<CryptoData[]> {
+    const baseUrl = 'https://api.coingecko.com/api/v3/simple/price';
+    const ids = cryptoIds.join(',');
+    const url = `${baseUrl}?ids=${ids}&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true`;
 
-// Function to get the list of cryptocurrencies
-export const fetchCryptoList = async (): Promise<string[]> => {
     try {
-        const response = await axios.get(`${BASE_URL}/coins/list`);
-        return response.data.map((coin: { id: string }) => coin.id);
+        const response = await axios.get(url);
+        return Object.entries(response.data).map(([id, data]) => ({
+            id,
+            name: id,
+            symbol: id.toUpperCase(),
+            current_price: data.usd,
+            market_cap: data.usd_market_cap,
+            total_volume: data.usd_24h_vol,
+        }));
     } catch (error) {
-        console.error('Error fetching crypto list:', error);
-        throw new Error('Failed to fetch the cryptocurrency list');
+        console.error('Error fetching crypto data:', error);
+        throw new Error('Failed to fetch crypto data');
     }
-};
-
-// Function to fetch historical data
-export const fetchHistoricalData = async (id: string, days: number): Promise<any[]> => {
-    try {
-        const response = await axios.get(`${BASE_URL}/coins/${id}/market_chart?vs_currency=usd&days=${days}`);
-        return response.data.prices;
-    } catch (error) {
-        console.error('Error fetching historical data:', error);
-        throw new Error('Failed to fetch historical data');
-    }
-};
+}
